@@ -1,5 +1,6 @@
-import { ArrowRight, Blocks, CheckCircle2, Github, ShieldCheck, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, Blocks, CheckCircle2, GitFork, Github, ShieldCheck, Sparkles, Star, Tag } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import pkg from '../package.json';
 import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { AlgorithmPage } from './pages/AlgorithmPage';
 import { SetupPage } from './pages/SetupPage';
@@ -11,6 +12,51 @@ import { VerifyPage } from './pages/VerifyPage';
 import { hasUnfinishedDraw, startNewDraw } from './lib/storage';
 
 const SOURCE_REPO_URL = import.meta.env.VITE_SOURCE_REPO_URL ?? '';
+const REPO_NAME = SOURCE_REPO_URL.split('/').filter(Boolean).pop() ?? '';
+const REPO_API_URL = SOURCE_REPO_URL.replace('https://github.com/', 'https://api.github.com/repos/');
+
+interface RepoInfo {
+  stars: number;
+  forks: number;
+  tag: string | null;
+}
+
+function formatRepoCount(value: number): string {
+  if (value >= 1000) {
+    const thousands = value / 1000;
+    const fixed = thousands >= 100 ? thousands.toFixed(0) : thousands.toFixed(1);
+    return `${fixed.replace(/\.0$/, '')}k`;
+  }
+  return String(value);
+}
+
+function useRepoInfo(apiUrl: string): RepoInfo | null {
+  const [info, setInfo] = useState<RepoInfo | null>(null);
+  useEffect(() => {
+    if (!apiUrl) return undefined;
+    let cancelled = false;
+    (async () => {
+      try {
+        const repoResponse = await fetch(apiUrl, { headers: { Accept: 'application/vnd.github+json' } });
+        if (!repoResponse.ok) return;
+        const repo = await repoResponse.json();
+        let tag: string | null = null;
+        try {
+          const releaseResponse = await fetch(`${apiUrl}/releases/latest`, { headers: { Accept: 'application/vnd.github+json' } });
+          if (releaseResponse.ok) {
+            const release = await releaseResponse.json();
+            tag = release.tag_name ?? null;
+          }
+        } catch { /* 标签获取失败时回退到本地版本号 */ }
+        if (!cancelled) {
+          setInfo({ stars: repo.stargazers_count ?? 0, forks: repo.forks_count ?? 0, tag });
+        }
+      } catch { /* 离线或限流时仅显示仓库名称 */ }
+    })();
+    return () => { cancelled = true; };
+  }, [apiUrl]);
+  return info;
+}
 
 function Brand() {
   return (
@@ -22,13 +68,20 @@ function Brand() {
 }
 
 function SiteHeader() {
+  const repoInfo = useRepoInfo(REPO_API_URL);
   return (
     <header className="site-header">
       <div className="header-inner">
         <Brand />
         {SOURCE_REPO_URL ? (
-          <a className="source-link" href={SOURCE_REPO_URL} target="_blank" rel="noreferrer">
-            <Github size={17} /> 源代码
+          <a className="repo-link" href={SOURCE_REPO_URL} target="_blank" rel="noreferrer" title={REPO_NAME ? `GitHub · ${REPO_NAME}` : 'GitHub'}>
+            <span className="repo-mark" aria-hidden="true"><Github size={15} /></span>
+            <span className="repo-name">{REPO_NAME}</span>
+            <span className="repo-stats">
+              <span className="repo-stat"><Tag size={13} /> {repoInfo?.tag ?? `v${pkg.version}`}</span>
+              {repoInfo && <span className="repo-stat"><Star size={13} /> {formatRepoCount(repoInfo.stars)}</span>}
+              {repoInfo && <span className="repo-stat"><GitFork size={13} /> {formatRepoCount(repoInfo.forks)}</span>}
+            </span>
           </a>
         ) : (
           <span className="source-link is-disabled" title="源代码即将开放">

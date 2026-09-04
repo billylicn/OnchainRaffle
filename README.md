@@ -29,7 +29,7 @@ https://billylicn.github.io/OnchainRaffle/
 要求 Node.js `>= 20.19.0`。
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/billylicn/OnchainRaffle.git
 cd chain-draw
 npm ci
 npm run dev
@@ -47,16 +47,6 @@ npm run test:e2e   # 运行 Playwright
 npm run build      # 类型检查并生成 dist/
 npm run preview    # 本地预览生产构建
 ```
-
-## 环境变量
-
-复制 `.env.example` 为 `.env.local`，按需配置：
-
-```bash
-VITE_SOURCE_REPO_URL=https://github.com/owner/repository
-```
-
-配置后，页头和公证页会显示源代码入口；未配置时显示“源代码即将开放”。所有 `VITE_` 变量都会进入浏览器构建产物，禁止填写密钥或其他秘密信息。
 
 ## 使用流程
 
@@ -85,17 +75,11 @@ VITE_SOURCE_REPO_URL=https://github.com/owner/repository
 
 ## 公证凭证
 
-当前仅生成和验证最新的 `DrawProofV3`。V1、V2 和旧摘要凭证不再兼容。
-
-V3 记录：
-
 - 凭证版本、`CHAIN_DRAW_V1` 和 Ethereum `chainId = 1`
 - 目标区块高度、区块哈希、链上 Unix 时间戳和完成确认区块高度
 - 参与者来源模式、参与总人数和参与者摘要
 - 按开奖顺序排列的奖项名称与名额
 - 结果摘要
-
-V3 不记录姓名、完整编号数组、中奖编号数组、浏览器锁定时间或计算完成时间。验证页根据参与总人数重建 `1...N`，根据奖项顺序重建所有抽奖槽位，重新执行 `CHAIN_DRAW_V1`，最后核对结果摘要并展示重新计算出的中奖编号。
 
 二维码链接使用 `/#/verify?proof=...`，凭证经 Deflate 压缩和 Base64URL 编码。当前所有二维码都是完整复算凭证，不使用摘要降级。
 
@@ -163,12 +147,3 @@ src/
 e2e/                Playwright 完整流程测试
 .github/             CI、Pages 部署和协作模板
 ```
-
-## 开源协作
-
-- 贡献方式见 [CONTRIBUTING.md](./CONTRIBUTING.md)。
-- 安全问题报告方式见 [SECURITY.md](./SECURITY.md)。
-- 版本变更见 [CHANGELOG.md](./CHANGELOG.md)。
-- 项目使用 [MIT License](./LICENSE)。
-
-涉及 `CHAIN_DRAW_V1` 或 `DrawProofV3` 语义的改动必须升级协议版本，并提供固定测试向量；不能在原版本名下静默改变既有开奖结果或验证含义。
