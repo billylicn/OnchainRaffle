@@ -1,0 +1,50 @@
+{
+  "name": "chain-draw",
+  "private": true,
+  "version": "1.1.0",
+  "description": "基于 Ethereum Mainnet 区块哈希的纯静态、公开可复算抽奖网站。",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "keywords": [
+    "ethereum",
+    "lottery",
+    "verifiable-randomness",
+    "react",
+    "static-site"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@noble/hashes": "^2.0.0",
+    "lucide-react": "^0.544.0",
+    "pako": "^2.1.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.8.2",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/node": "^24.3.0",
+    "@types/pako": "^2.0.3",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "jsdom": "^26.1.0",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.4",
+    "vitest": "^3.2.4"
+  }
+}
